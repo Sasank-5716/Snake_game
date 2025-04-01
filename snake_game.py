@@ -48,8 +48,24 @@ class Snake:
         for segment in self.body:
             pygame.draw.rect(screen, GREEN, (segment[0], segment[1], self.size, self.size))
 
+class Food:
+    def __init__(self):
+        self.size = 20
+        self.x = random.randint(0, (WIDTH - self.size) // self.size) * self.size
+        self.y = random.randint(0, (HEIGHT - self.size) // self.size) * self.size
+    
+    def draw(self, screen):
+        pygame.draw.rect(screen, RED, (self.x, self.y, self.size, self.size))
+    
+    def respawn(self):
+        self.x = random.randint(0, (WIDTH - self.size) // self.size) * self.size
+        self.y = random.randint(0, (HEIGHT - self.size) // self.size) * self.size
+
 # Game setup
 snake = Snake()
+food = Food()
+score = 0
+font = pygame.font.SysFont(None, 36)
 
 # Game loop
 running = True
@@ -75,8 +91,24 @@ while running:
     
     snake.move()
     
+    # Check for food collision
+    if snake.x == food.x and snake.y == food.y:
+        snake.length += 1
+        score += 1
+        food.respawn()
+    
+    # Check for self-collision
+    if (snake.x, snake.y) in snake.body[1:]:
+        running = False
+    
     screen.fill(BLACK)
     snake.draw(screen)
+    food.draw(screen)
+    
+    # Display score
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    screen.blit(score_text, (10, 10))
+    
     pygame.display.update()
     clock.tick(10)  # 10 FPS
 
